@@ -1,0 +1,24 @@
+[project]
+name = "rubiks-cube-ai-toolkit"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Aswin1988", email = "YOUR_GITHUB_NOREPLY_EMAIL" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+rubiks-cube-ai-toolkit = "rubiks_cube_ai_toolkit:main"
+
+[build-system]
+requires = ["uv_build>=0.10.2,<0.11.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.5",
+]
