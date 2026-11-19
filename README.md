@@ -10,16 +10,21 @@ and reproducible benchmarks.
 
 ## Current scope
 
-The initial implementation provides:
+The current implementation provides:
 
 - immutable cubie and facelet state representations;
 - all 18 Singmaster face moves;
 - move parsing, inversion, local normalization, and seeded scrambles;
 - conversion between cubie and facelet representations;
 - structured validation of physical cube constraints.
+- an independent sticker-cycle verification engine with HTM/QTM metrics;
+- a verification-gated `Solver` protocol and structured failure outcomes;
+- functional `scramble`, `validate`, `apply`, `solve`, and `verify` CLI commands.
 
-Solver integration, independent solution verification, MCP tools, agent skills, and
-computer vision are planned but are not part of the current milestone.
+A reviewed solver dependency is not yet enabled; `solve` reports `unavailable` for
+non-solved cubes. The measured blocker and candidate review are documented in
+[docs/solver-evaluation.md](docs/solver-evaluation.md). MCP tools, agent skills, and
+computer vision remain out of scope.
 
 ## Requirements
 
@@ -66,12 +71,25 @@ result = validate_state(state.to_facelets())
 assert result.valid
 ```
 
+## CLI
+
+```console
+cube-ai scramble --length 20 --seed research-1 --json
+cube-ai validate UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB
+cube-ai apply UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB R U "R'" "U'"
+cube-ai verify <state> R U2 "F'"
+cube-ai solve <state> --timeout 10 --max-moves 30 --json
+```
+
+Exit codes are 0 for success, 2 for usage or notation errors, 3 for invalid states or
+failed verification, 4 for timeout, and 5 for solver failure or unavailability.
+
 ## Reliability policy
 
-Solver output will never be treated as correct merely because the solver returned it.
-The planned verification engine uses an independently implemented facelet transition
-model. Research results will identify their corpus, seed, software revision, environment,
-and verification status.
+Solver output is never treated as correct merely because the solver returned it. The
+independent facelet engine uses literal sticker cycles rather than the mathematical
+engine's geometry. Research results identify their corpus, seed, software revision,
+environment, and verification status.
 
 ## License
 

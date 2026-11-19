@@ -47,8 +47,16 @@ Parsing establishes only the shape and alphabet of a facelet string. Physical va
 is separate and returns all safely detectable diagnostics. A parsed state is not therefore
 assumed reachable.
 
-## Future solver boundary
+## Independent verification boundary
 
-Mature deterministic solvers will be integrated behind a small `Solver` protocol. Solver
-results will be checked by an independently implemented facelet verifier before exposure
-through CLI or MCP interfaces.
+The verification engine advances stickers through literal four-cycles transcribed from
+external conformance data. It does not import the geometry permutation generator.
+Verification validates the initial state, rejects malformed notation, returns the final
+state, and reports HTM and QTM counts.
+
+## Solver boundary
+
+Third-party deterministic solvers implement the small `Solver` protocol. `VerifiedSolver`
+validates inputs, handles solved cubes, enforces time and move limits, and independently
+checks every proposed solution. A backend response cannot become `success` when this gate
+fails. No dependency is enabled until its license and operational behavior pass review.

@@ -28,8 +28,9 @@ jobs:
       - name: Smoke-test wheel installation
         run: >-
           uv run --isolated --no-project
-          --with ./dist/rubiks_cube_ai_toolkit-0.1.0-py3-none-any.whl
-          python -c "import rubiks_cube_ai_toolkit as package; assert package.__version__ == '0.1.0'"
+          --refresh-package rubiks-cube-ai-toolkit
+          --with ./dist/rubiks_cube_ai_toolkit-0.2.0-py3-none-any.whl
+          python -c "import rubiks_cube_ai_toolkit as package; from rubiks_cube_ai_toolkit.verification import StickerState; assert package.__version__ == '0.2.0'; assert StickerState.solved().is_solved"
 
   test:
     strategy:
