@@ -17,3 +17,19 @@ dist/
 .codex/
 .claude/
 .gemini/
+.idea/
+.DS_Store
+Thumbs.db
+*.prof
+
+# Local tool caches and generated research artifacts
+.uv-cache/
+.mypy_cache/
+benchmark-results/
+generated-tables/
+
+# Optional computer-vision assets remain local unless explicitly curated
+data/raw/
+models/
+captures/
+calibration.local.*
