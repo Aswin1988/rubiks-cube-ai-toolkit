@@ -70,7 +70,10 @@ class CubieState:
     def _check_coordinates(values: Sequence[int], length: int, limit: int, name: str) -> None:
         if len(values) != length:
             raise ValueError(f"{name} must contain {length} values")
-        if any(not isinstance(value, int) or not 0 <= value < limit for value in values):
+        if any(
+            isinstance(value, bool) or not isinstance(value, int) or not 0 <= value < limit
+            for value in values
+        ):
             raise ValueError(f"{name} values must be integers in range [0, {limit})")
 
     @classmethod

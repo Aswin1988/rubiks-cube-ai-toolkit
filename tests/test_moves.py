@@ -58,6 +58,30 @@ def test_known_f_move_cubie_vector() -> None:
     assert state.edge_orientation == (0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0)
 
 
+def test_known_d_move_cubie_vector() -> None:
+    state = CubieState.solved().apply_move(Move.D)
+    assert state.corner_permutation == (0, 1, 2, 3, 5, 6, 7, 4)
+    assert state.corner_orientation == (0,) * 8
+    assert state.edge_permutation == (0, 1, 2, 3, 5, 6, 7, 4, 8, 9, 10, 11)
+    assert state.edge_orientation == (0,) * 12
+
+
+def test_known_l_move_cubie_vector() -> None:
+    state = CubieState.solved().apply_move(Move.L)
+    assert state.corner_permutation == (0, 2, 6, 3, 4, 1, 5, 7)
+    assert state.corner_orientation == (0, 1, 2, 0, 0, 2, 1, 0)
+    assert state.edge_permutation == (0, 1, 10, 3, 4, 5, 9, 7, 8, 2, 6, 11)
+    assert state.edge_orientation == (0,) * 12
+
+
+def test_known_b_move_cubie_vector() -> None:
+    state = CubieState.solved().apply_move(Move.B)
+    assert state.corner_permutation == (0, 1, 3, 7, 4, 5, 2, 6)
+    assert state.corner_orientation == (0, 0, 1, 2, 0, 0, 2, 1)
+    assert state.edge_permutation == (0, 1, 2, 11, 4, 5, 6, 10, 8, 9, 3, 7)
+    assert state.edge_orientation == (0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1)
+
+
 def test_parse_invert_and_apply_sequence() -> None:
     moves = parse_moves("R U R' U'")
     assert moves == (Move.R, Move.U, Move.R_PRIME, Move.U_PRIME)

@@ -43,6 +43,14 @@ def test_cubie_state_is_immutable_and_validates_coordinate_shape() -> None:
         CubieState(tuple(range(8)), (3,) + (0,) * 7, tuple(range(12)), (0,) * 12)
 
 
+@pytest.mark.parametrize("coordinate", range(4))
+def test_boolean_cubie_coordinates_are_rejected(coordinate: int) -> None:
+    values = [list(range(8)), [0] * 8, list(range(12)), [0] * 12]
+    values[coordinate][0] = False
+    with pytest.raises(ValueError, match="must be integers"):
+        CubieState(*(tuple(items) for items in values))
+
+
 def test_cubie_mapping_serialization_round_trip() -> None:
     state = CubieState.solved().apply_moves(generate_scramble(30, seed="mapping"))
     assert CubieState.from_dict(state.to_dict()) == state

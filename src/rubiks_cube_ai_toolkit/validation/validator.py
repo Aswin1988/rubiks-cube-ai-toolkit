@@ -9,11 +9,11 @@ from enum import StrEnum
 
 from rubiks_cube_ai_toolkit.model.cubie import Corner, CubieState, Edge
 from rubiks_cube_ai_toolkit.model.facelets import (
-    CORNER_COLORS,
     CORNER_FACELETS,
     EDGE_COLORS,
     EDGE_FACELETS,
     FaceletState,
+    match_corner_colors,
 )
 from rubiks_cube_ai_toolkit.model.moves import Face
 
@@ -177,18 +177,8 @@ def _identify_facelet_cubies(
     corner_orientation: list[int] = []
     for position, indices in enumerate(CORNER_FACELETS):
         observed = tuple(state.facelets[index] for index in indices)
-        orientation = next(
-            (index for index, color in enumerate(observed) if color in (Face.U, Face.D)),
-            None,
-        )
-        cubie: int | None = None
-        if orientation is not None:
-            side_colors = observed[(orientation + 1) % 3], observed[(orientation + 2) % 3]
-            cubie = next(
-                (index for index, colors in enumerate(CORNER_COLORS) if colors[1:] == side_colors),
-                None,
-            )
-        if orientation is None or cubie is None:
+        match = match_corner_colors(observed)
+        if match is None:
             issues.append(
                 ValidationIssue(
                     ValidationCode.INVALID_CORNER,
@@ -200,6 +190,7 @@ def _identify_facelet_cubies(
                 )
             )
             continue
+        cubie, orientation = match
         corner_permutation.append(cubie)
         corner_orientation.append(orientation)
 

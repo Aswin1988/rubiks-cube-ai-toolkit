@@ -61,6 +61,24 @@ EDGE_COLORS = (
 )
 
 
+def match_corner_colors(observed: tuple[Face, Face, Face]) -> tuple[int, int] | None:
+    """Return ``(cubie, orientation)`` for an exact ordered corner-color match."""
+    orientation = next(
+        (index for index, color in enumerate(observed) if color in (Face.U, Face.D)),
+        None,
+    )
+    if orientation is None:
+        return None
+    normalized = tuple(observed[(orientation + offset) % 3] for offset in range(3))
+    cubie = next(
+        (index for index, colors in enumerate(CORNER_COLORS) if colors == normalized),
+        None,
+    )
+    if cubie is None:
+        return None
+    return cubie, orientation
+
+
 @dataclass(frozen=True, slots=True)
 class FaceletState:
     """An immutable cube state containing 54 canonical face labels."""
@@ -125,19 +143,10 @@ class FaceletState:
         corner_orientation: list[int] = []
         for indices in CORNER_FACELETS:
             observed = tuple(self.facelets[index] for index in indices)
-            try:
-                orientation = next(
-                    index for index, color in enumerate(observed) if color in (Face.U, Face.D)
-                )
-            except StopIteration as error:
-                raise ValueError(f"unrecognized corner colors: {observed}") from error
-            side_colors = observed[(orientation + 1) % 3], observed[(orientation + 2) % 3]
-            cubie = next(
-                (index for index, colors in enumerate(CORNER_COLORS) if colors[1:] == side_colors),
-                None,
-            )
-            if cubie is None:
+            match = match_corner_colors(observed)
+            if match is None:
                 raise ValueError(f"unrecognized corner colors: {observed}")
+            cubie, orientation = match
             corner_permutation.append(cubie)
             corner_orientation.append(orientation % 3)
 

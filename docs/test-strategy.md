@@ -6,6 +6,10 @@ Unit tests cover state construction, known move vectors, notation, normalization
 conversion, serialization, and each validation diagnostic. Algebraic tests cover move
 inverses, four quarter turns, round trips, and deterministic scrambles.
 
+Externally grounded move vectors and their provenance are recorded in
+`docs/conformance-vectors.md`. Corner identification tests cover every identity in every
+orientation as well as mirrored and substituted-color adversarial inputs.
+
 Future conformance tests will compare the mathematical engine with independent published
 vectors and solver adapters. The solution verifier must not import solver transition code.
 

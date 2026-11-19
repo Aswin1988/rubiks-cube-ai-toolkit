@@ -24,6 +24,12 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run ruff check .
       - run: uv run pytest
+      - run: uv build
+      - name: Smoke-test wheel installation
+        run: >-
+          uv run --isolated --no-project
+          --with ./dist/rubiks_cube_ai_toolkit-0.1.0-py3-none-any.whl
+          python -c "import rubiks_cube_ai_toolkit as package; assert package.__version__ == '0.1.0'"
 
   test:
     strategy:
