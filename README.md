@@ -5,8 +5,8 @@ technical research.
 
 The project focuses on capabilities an agent can execute and independently check:
 canonical cube-state modeling, physical reachability validation, deterministic solving
-through a pluggable solver interface, independent solution verification, an MCP server,
-and reproducible benchmarks.
+through a pluggable solver interface, independent solution verification, and reproducible
+benchmarks.
 
 ## Current scope
 
@@ -116,6 +116,19 @@ bounds input, output, time, process-tree memory, and table-directory growth, the
 the complete discoverable process tree on a limit violation. Memory and disk limits are
 sampling-based rather than identical kernel-enforced quotas on every supported OS; see
 [the architecture notes](docs/architecture.md#subprocess-safety) for platform details.
+
+## Solver benchmark
+
+The fixed-seed Windows 11 / Python 3.12 benchmark processed 1,000 twenty-move scrambles
+(seeds 0–999; corpus SHA-256
+`6ed57f361dff6d61a7b51b95318623ae1713991e7701175bc15bdea7348f5428`) with
+`rubik-solver-py==0.1.1`. It returned 999 independently verified solutions and one
+10-second timeout (seed 650); there were no crashes. Verified solve rate was 99.9%.
+End-to-end P50/P95/P99 latency was 0.98/2.86/5.08 seconds; successful solutions averaged
+21.65 moves, with a maximum of 22. Peak observed process-tree memory was 79.5 MB, generated
+tables occupied 8.74 MB, and cold initialization took 27.02 seconds. See the complete
+[benchmark methodology and result](docs/phase2-benchmark.md), including the timeout and
+reproduction command.
 
 ## License
 
