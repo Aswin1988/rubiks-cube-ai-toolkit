@@ -15,6 +15,12 @@ Conformance tests compare all 18 moves against the independent sticker-cycle eng
 responses test the mandatory verification gate. The solution verifier must not import
 solver transition code.
 
+MCP tests call every tool contract directly for valid and invalid inputs, assert the exact
+five-tool registration surface, exercise timeout, resource-limit, and unavailable solver
+outcomes through an injected verified-solver service, and check the actionable failure when
+the optional SDK is absent. Direct contract tests avoid starting a real stdio loop while
+the wheel smoke test confirms the optional MCP extra can construct the packaged server.
+
 Subprocess tests use lightweight synthetic workers to exercise bounded IPC, malformed
 JSON, crashes, hard deadlines, memory/disk stops, output truncation, and full descendant
 termination. Cache tests cover incomplete files, wrong sizes and headers, same-size hash
@@ -31,6 +37,7 @@ verifies its result. The CI matrix installs the optional solver extra on Python 
 - Branch coverage of at least 90 percent during the foundation phase
 - Source distribution and wheel build smoke tests on every pull request
 - Real optional-solver subprocess and cache initialization on supported interpreters
+- MCP server construction from the built wheel with only the optional `mcp` extra
 
 ## Failure policy
 

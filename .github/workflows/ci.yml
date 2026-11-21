@@ -29,12 +29,17 @@ jobs:
         run: >-
           uv run --isolated --no-project
           --refresh-package rubiks-cube-ai-toolkit
-          --with ./dist/rubiks_cube_ai_toolkit-0.2.0-py3-none-any.whl
-          python -c "import rubiks_cube_ai_toolkit as package; from rubiks_cube_ai_toolkit.verification import StickerState; assert package.__version__ == '0.2.0'; assert StickerState.solved().is_solved"
+          --with ./dist/rubiks_cube_ai_toolkit-0.3.0-py3-none-any.whl
+          python -c "import rubiks_cube_ai_toolkit as package; from rubiks_cube_ai_toolkit.verification import StickerState; assert package.__version__ == '0.3.0'; assert StickerState.solved().is_solved"
+      - name: Smoke-test wheel MCP extra
+        run: >-
+          uv run --isolated --no-project
+          --with "./dist/rubiks_cube_ai_toolkit-0.3.0-py3-none-any.whl[mcp]"
+          python -c "from rubiks_cube_ai_toolkit.mcp_server import create_server; assert create_server()"
       - name: Smoke-test wheel solver extra
         run: >-
           uv run --isolated --no-project
-          --with "./dist/rubiks_cube_ai_toolkit-0.2.0-py3-none-any.whl[solver]"
+          --with "./dist/rubiks_cube_ai_toolkit-0.3.0-py3-none-any.whl[solver]"
           python -c "import numpy, psutil, rubik_solver; from rubiks_cube_ai_toolkit.solvers import RubikSolverSubprocess; assert RubikSolverSubprocess.name == 'rubik-solver-py-0.1.1'"
 
   test:

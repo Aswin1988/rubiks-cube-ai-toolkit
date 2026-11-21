@@ -3,8 +3,8 @@
 ## Dependency direction
 
 The dependency-free mathematical model is the foundation. Validation may depend on the
-model. Future solver adapters, verification, CLI, MCP, skills, benchmarks, and vision may
-depend on the model and validation, but the model must not depend on them.
+model. Solver adapters, verification, CLI, MCP, skills, benchmarks, and vision may depend
+on the model and validation, but the model must not depend on them.
 
 ## Canonical coordinates
 
@@ -95,3 +95,21 @@ Initialization uses an exclusive lock, a same-filesystem staging directory, exac
 and size checks, NumPy magic checks, SHA-256 integrity metadata, and atomic directory
 publication. Incomplete or corrupted caches are rebuilt under the lock. Cold
 initialization and warm solving have separate deadlines.
+
+## MCP boundary
+
+`mcp_server.py` is a transport adapter over the existing public engine boundaries. It does
+not implement cube mathematics, validation rules, solver behavior, or verification logic.
+The official Python MCP SDK is imported only by `create_server`, so importing and using the
+core package does not require MCP dependencies. The `mcp` extra owns that optional runtime.
+
+The initial transport is local stdio. Five synchronous tool functions return a stable JSON
+envelope with explicit success or error data. SDK-generated schemas validate protocol
+arguments, while the functions also enforce exact runtime types and positive resource
+limits so direct calls have the same contract. `cube_solve` constructs the existing
+`RubikSolverSubprocess` configuration and `SolveLimits`; it preserves the supervisor's
+process, time, memory, output, disk-growth, and cache controls. Only `VerifiedSolver`
+results can be reported as solve success.
+
+This is an additive adapter and does not change the canonical state format, coordinate
+system, or existing API. There is therefore no state migration impact.

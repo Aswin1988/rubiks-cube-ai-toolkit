@@ -27,7 +27,7 @@ def test_cli_prints_version(
     monkeypatch.setattr(sys, "argv", ["cube-ai", "--version"])
     with pytest.raises(SystemExit, match="0"):
         main()
-    assert "cube-ai 0.2.0" in capsys.readouterr().out
+    assert "cube-ai 0.3.0" in capsys.readouterr().out
 
 
 def test_scramble_human_and_json_output(capsys: pytest.CaptureFixture[str]) -> None:
