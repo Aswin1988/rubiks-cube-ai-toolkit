@@ -5,21 +5,26 @@ technical research.
 
 The project focuses on capabilities an agent can execute and independently check:
 canonical cube-state modeling, physical reachability validation, deterministic solving
-through a pluggable solver interface, independent solution verification, an MCP server,
-and reproducible benchmarks.
+through a pluggable solver interface, independent solution verification, and reproducible
+benchmarks.
 
 ## Current scope
 
-The initial implementation provides:
+The current implementation provides:
 
 - immutable cubie and facelet state representations;
 - all 18 Singmaster face moves;
 - move parsing, inversion, local normalization, and seeded scrambles;
 - conversion between cubie and facelet representations;
 - structured validation of physical cube constraints.
+- an independent sticker-cycle verification engine with HTM/QTM metrics;
+- a verification-gated `Solver` protocol and structured failure outcomes;
+- functional `scramble`, `validate`, `apply`, `solve`, and `verify` CLI commands;
+- an optional `rubik-solver-py` backend isolated behind a supervised JSON subprocess.
 
-Solver integration, independent solution verification, MCP tools, agent skills, and
-computer vision are planned but are not part of the current milestone.
+The solver extra is deliberately optional. Without it, `solve` reports an actionable
+`unavailable` result; modeling, validation, move application, and verification remain
+dependency-free. MCP tools, agent skills, and computer vision remain out of scope.
 
 ## Requirements
 
@@ -33,6 +38,12 @@ uv sync --dev
 uv run ruff format --check .
 uv run ruff check .
 uv run pytest
+```
+
+Install the reviewed deterministic solver stack when solving is required:
+
+```console
+uv sync --dev --extra solver
 ```
 
 If the machine-wide `uv` cache is unavailable, use an ignored local cache:
@@ -66,18 +77,67 @@ result = validate_state(state.to_facelets())
 assert result.valid
 ```
 
+## CLI
+
+```console
+cube-ai scramble --length 20 --seed research-1 --json
+cube-ai validate UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB
+cube-ai apply UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB R U "R'" "U'"
+cube-ai verify <state> R U2 "F'"
+cube-ai solve <state> --timeout 10 --max-moves 30 --json
+```
+
+`--timeout` is the warm solve deadline. First use may spend up to 60 seconds creating
+about 9 MiB of validated tables in the operating system's user cache; use
+`--init-timeout` to change that one-time deadline. The default process-tree memory budget
+is 1 GiB and the generated-cache ceiling is 64 MiB.
+
+Example verified solve:
+
+```console
+cube-ai solve BUUBUULDDLBBLRRBRRUFFUFFURRRDDDDFBBFLLFLLFUBFLLDUBDDRR --json
+```
+
+If the optional extra is absent, install it with `uv sync --extra solver` (or install the
+wheel with its `[solver]` extra) and retry.
+
+Exit codes are 0 for success, 2 for usage or notation errors, 3 for invalid states or
+failed verification, 4 for timeout, and 5 for solver failure or unavailability.
+
 ## Reliability policy
 
-Solver output will never be treated as correct merely because the solver returned it.
-The planned verification engine uses an independently implemented facelet transition
-model. Research results will identify their corpus, seed, software revision, environment,
-and verification status.
+Solver output is never treated as correct merely because the solver returned it. The
+independent facelet engine uses literal sticker cycles rather than the mathematical
+engine's geometry. Research results identify their corpus, seed, software revision,
+environment, and verification status.
+
+The optional backend runs with `shell=False` in a separate process group. The supervisor
+bounds input, output, time, process-tree memory, and table-directory growth, then kills
+the complete discoverable process tree on a limit violation. Memory and disk limits are
+sampling-based rather than identical kernel-enforced quotas on every supported OS; see
+[the architecture notes](docs/architecture.md#subprocess-safety) for platform details.
+
+## Solver benchmark
+
+The fixed-seed Windows 11 / Python 3.12 benchmark processed 1,000 twenty-move scrambles
+(seeds 0–999; corpus SHA-256
+`6ed57f361dff6d61a7b51b95318623ae1713991e7701175bc15bdea7348f5428`) with
+`rubik-solver-py==0.1.1`. It returned 999 independently verified solutions and one
+10-second timeout (seed 650); there were no crashes. Verified solve rate was 99.9%.
+End-to-end P50/P95/P99 latency was 0.98/2.86/5.08 seconds; successful solutions averaged
+21.65 moves, with a maximum of 22. Peak observed process-tree memory was 79.5 MB, generated
+tables occupied 8.74 MB, and cold initialization took 27.02 seconds. See the complete
+[benchmark methodology and result](docs/phase2-benchmark.md), including the timeout and
+reproduction command.
 
 ## License
 
 Original project code is licensed under the [MIT License](LICENSE). Third-party solver,
 MCP, and computer-vision dependencies will receive a documented license review before
 integration; their licenses remain their own.
+
+Optional solver attribution is recorded in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Contributing
 

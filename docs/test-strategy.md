@@ -10,8 +10,18 @@ Externally grounded move vectors and their provenance are recorded in
 `docs/conformance-vectors.md`. Corner identification tests cover every identity in every
 orientation as well as mirrored and substituted-color adversarial inputs.
 
-Future conformance tests will compare the mathematical engine with independent published
-vectors and solver adapters. The solution verifier must not import solver transition code.
+Conformance tests compare all 18 moves against the independent sticker-cycle engine over
+1,000 fixed seeds and assert every intermediate state. Deliberately incorrect solver
+responses test the mandatory verification gate. The solution verifier must not import
+solver transition code.
+
+Subprocess tests use lightweight synthetic workers to exercise bounded IPC, malformed
+JSON, crashes, hard deadlines, memory/disk stops, output truncation, and full descendant
+termination. Cache tests cover incomplete files, wrong sizes and headers, same-size hash
+corruption, stale locks, atomic replacement, and concurrent initialization. One marked
+test invokes the real pinned solver from an empty temporary cache and independently
+verifies its result. The CI matrix installs the optional solver extra on Python 3.12 and
+3.13 across Windows, Linux, and macOS.
 
 ## Required gates
 
@@ -19,7 +29,8 @@ vectors and solver adapters. The solution verifier must not import solver transi
 - Ruff linting
 - Pytest on supported Python versions
 - Branch coverage of at least 90 percent during the foundation phase
-- Source distribution and wheel build smoke tests when publishing is introduced
+- Source distribution and wheel build smoke tests on every pull request
+- Real optional-solver subprocess and cache initialization on supported interpreters
 
 ## Failure policy
 

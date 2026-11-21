@@ -9,10 +9,10 @@
 
 ## Deterministic capability
 
-- Define and test a `Solver` protocol
-- Review and integrate a mature license-compatible deterministic solver
-- Build an independent facelet-based solution verifier
-- Provide stable Python and CLI APIs
+- Defined and tested a `Solver` protocol
+- Integrated a pinned MIT solver behind a supervised optional subprocess
+- Built an independent facelet-based solution verifier
+- Provided stable Python and CLI APIs
 
 ## Agent integration
 
