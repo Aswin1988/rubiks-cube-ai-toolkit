@@ -15,6 +15,14 @@ Conformance tests compare all 18 moves against the independent sticker-cycle eng
 responses test the mandatory verification gate. The solution verifier must not import
 solver transition code.
 
+Subprocess tests use lightweight synthetic workers to exercise bounded IPC, malformed
+JSON, crashes, hard deadlines, memory/disk stops, output truncation, and full descendant
+termination. Cache tests cover incomplete files, wrong sizes and headers, same-size hash
+corruption, stale locks, atomic replacement, and concurrent initialization. One marked
+test invokes the real pinned solver from an empty temporary cache and independently
+verifies its result. The CI matrix installs the optional solver extra on Python 3.12 and
+3.13 across Windows, Linux, and macOS.
+
 ## Required gates
 
 - Ruff formatting check
@@ -22,6 +30,7 @@ solver transition code.
 - Pytest on supported Python versions
 - Branch coverage of at least 90 percent during the foundation phase
 - Source distribution and wheel build smoke tests on every pull request
+- Real optional-solver subprocess and cache initialization on supported interpreters
 
 ## Failure policy
 

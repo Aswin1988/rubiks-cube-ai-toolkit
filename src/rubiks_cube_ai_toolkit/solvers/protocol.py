@@ -17,6 +17,18 @@ class SolverTimeoutError(TimeoutError):
     """Raised by a backend when its execution limit expires."""
 
 
+class SolverUnavailableError(RuntimeError):
+    """Raised when an optional solver backend is not installed."""
+
+
+class SolverResourceError(RuntimeError):
+    """Raised when a backend exceeds a configured resource limit."""
+
+
+class SolverProtocolError(RuntimeError):
+    """Raised when a backend violates its structured IPC contract."""
+
+
 @dataclass(frozen=True, slots=True)
 class SolveLimits:
     """Upper bounds passed to a deterministic solver backend."""
@@ -54,6 +66,7 @@ class SolveStatus(StrEnum):
     FAILURE = "failure"
     VERIFICATION_FAILED = "verification_failed"
     UNAVAILABLE = "unavailable"
+    RESOURCE_LIMIT = "resource_limit"
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,6 +149,20 @@ class VerifiedSolver:
                 time.perf_counter() - started,
                 error=str(error),
             )
+        except SolverUnavailableError as error:
+            return SolveResult(
+                SolveStatus.UNAVAILABLE,
+                self._backend.name,
+                time.perf_counter() - started,
+                error=str(error),
+            )
+        except SolverResourceError as error:
+            return SolveResult(
+                SolveStatus.RESOURCE_LIMIT,
+                self._backend.name,
+                time.perf_counter() - started,
+                error=str(error),
+            )
         except Exception as error:
             status = (
                 SolveStatus.UNAVAILABLE
@@ -148,7 +175,9 @@ class VerifiedSolver:
                 time.perf_counter() - started,
                 error=str(error),
             )
-        if elapsed > effective_limits.timeout_seconds:
+        if elapsed > effective_limits.timeout_seconds and not getattr(
+            self._backend, "enforces_hard_timeout", False
+        ):
             return SolveResult(
                 SolveStatus.TIMEOUT,
                 self._backend.name,

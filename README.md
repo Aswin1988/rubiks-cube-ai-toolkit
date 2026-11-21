@@ -19,12 +19,12 @@ The current implementation provides:
 - structured validation of physical cube constraints.
 - an independent sticker-cycle verification engine with HTM/QTM metrics;
 - a verification-gated `Solver` protocol and structured failure outcomes;
-- functional `scramble`, `validate`, `apply`, `solve`, and `verify` CLI commands.
+- functional `scramble`, `validate`, `apply`, `solve`, and `verify` CLI commands;
+- an optional `rubik-solver-py` backend isolated behind a supervised JSON subprocess.
 
-A reviewed solver dependency is not yet enabled; `solve` reports `unavailable` for
-non-solved cubes. The measured blocker and candidate review are documented in
-[docs/solver-evaluation.md](docs/solver-evaluation.md). MCP tools, agent skills, and
-computer vision remain out of scope.
+The solver extra is deliberately optional. Without it, `solve` reports an actionable
+`unavailable` result; modeling, validation, move application, and verification remain
+dependency-free. MCP tools, agent skills, and computer vision remain out of scope.
 
 ## Requirements
 
@@ -38,6 +38,12 @@ uv sync --dev
 uv run ruff format --check .
 uv run ruff check .
 uv run pytest
+```
+
+Install the reviewed deterministic solver stack when solving is required:
+
+```console
+uv sync --dev --extra solver
 ```
 
 If the machine-wide `uv` cache is unavailable, use an ignored local cache:
@@ -81,6 +87,20 @@ cube-ai verify <state> R U2 "F'"
 cube-ai solve <state> --timeout 10 --max-moves 30 --json
 ```
 
+`--timeout` is the warm solve deadline. First use may spend up to 60 seconds creating
+about 9 MiB of validated tables in the operating system's user cache; use
+`--init-timeout` to change that one-time deadline. The default process-tree memory budget
+is 1 GiB and the generated-cache ceiling is 64 MiB.
+
+Example verified solve:
+
+```console
+cube-ai solve BUUBUULDDLBBLRRBRRUFFUFFURRRDDDDFBBFLLFLLFUBFLLDUBDDRR --json
+```
+
+If the optional extra is absent, install it with `uv sync --extra solver` (or install the
+wheel with its `[solver]` extra) and retry.
+
 Exit codes are 0 for success, 2 for usage or notation errors, 3 for invalid states or
 failed verification, 4 for timeout, and 5 for solver failure or unavailability.
 
@@ -91,11 +111,20 @@ independent facelet engine uses literal sticker cycles rather than the mathemati
 engine's geometry. Research results identify their corpus, seed, software revision,
 environment, and verification status.
 
+The optional backend runs with `shell=False` in a separate process group. The supervisor
+bounds input, output, time, process-tree memory, and table-directory growth, then kills
+the complete discoverable process tree on a limit violation. Memory and disk limits are
+sampling-based rather than identical kernel-enforced quotas on every supported OS; see
+[the architecture notes](docs/architecture.md#subprocess-safety) for platform details.
+
 ## License
 
 Original project code is licensed under the [MIT License](LICENSE). Third-party solver,
 MCP, and computer-vision dependencies will receive a documented license review before
 integration; their licenses remain their own.
+
+Optional solver attribution is recorded in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Contributing
 

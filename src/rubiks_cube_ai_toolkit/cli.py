@@ -14,9 +14,10 @@ from rubiks_cube_ai_toolkit.model import (
     parse_moves,
 )
 from rubiks_cube_ai_toolkit.solvers import (
+    RubikSolverConfig,
+    RubikSolverSubprocess,
     SolveLimits,
     SolveStatus,
-    UnavailableSolver,
     VerifiedSolver,
 )
 from rubiks_cube_ai_toolkit.validation import validate_state
@@ -98,10 +99,15 @@ def _run_verify(args: argparse.Namespace) -> int:
 def _run_solve(args: argparse.Namespace) -> int:
     try:
         limits = SolveLimits(args.timeout, args.max_moves)
+        config = RubikSolverConfig(
+            initialization_timeout_seconds=args.init_timeout,
+            memory_limit_bytes=args.memory_limit_mb << 20,
+            cache_limit_bytes=args.cache_limit_mb << 20,
+        )
     except ValueError as error:
         _emit({"error": str(error)}, json_output=args.json, human=f"error: {error}")
         return EXIT_USAGE
-    result = VerifiedSolver(UnavailableSolver()).solve(args.state, limits)
+    result = VerifiedSolver(RubikSolverSubprocess(config)).solve(args.state, limits)
     notation = " ".join(move.value for move in result.moves)
     human = f"{result.status.value}: {notation}" if notation else result.status.value
     if result.error:
@@ -148,7 +154,25 @@ def _build_parser() -> argparse.ArgumentParser:
     solve = commands.add_parser("solve", help="solve with mandatory independent verification")
     solve.add_argument("state", help="54-character URFDLB facelet state")
     solve.add_argument("--timeout", type=float, default=10.0, help="time limit in seconds")
+    solve.add_argument(
+        "--init-timeout",
+        type=float,
+        default=60.0,
+        help="one-time table initialization limit in seconds",
+    )
     solve.add_argument("--max-moves", type=int, default=30, help="maximum accepted solution length")
+    solve.add_argument(
+        "--memory-limit-mb",
+        type=int,
+        default=1024,
+        help="process-tree memory budget in MiB",
+    )
+    solve.add_argument(
+        "--cache-limit-mb",
+        type=int,
+        default=64,
+        help="generated-table cache ceiling in MiB",
+    )
     _add_json_argument(solve)
     solve.set_defaults(handler=_run_solve)
 

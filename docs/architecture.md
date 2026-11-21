@@ -59,4 +59,39 @@ state, and reports HTM and QTM counts.
 Third-party deterministic solvers implement the small `Solver` protocol. `VerifiedSolver`
 validates inputs, handles solved cubes, enforces time and move limits, and independently
 checks every proposed solution. A backend response cannot become `success` when this gate
-fails. No dependency is enabled until its license and operational behavior pass review.
+fails.
+
+The reviewed implementation is `RubikSolverSubprocess`, backed by the optional
+`rubik-solver-py==0.1.1` extra. The main process sends one size-bounded JSON request to a
+private module worker and accepts one size-bounded JSON response. The worker never imports
+the mathematical transition engine or the independent verifier. The parent remains the
+only authority that can validate physical reachability and report verified success.
+
+## Subprocess safety
+
+The supervisor invokes the current Python interpreter without a shell. Standard output
+and error are drained concurrently but retained only up to configured bounds. Public
+errors use stable messages and never include captured stderr or cache paths.
+
+Each worker receives a new process group/session. On Windows the supervisor uses
+`taskkill /T /F` plus a captured psutil descendant set; on POSIX it kills the process
+group plus captured descendants. Cleanup runs from `finally` even when monitoring or IPC
+fails.
+
+Wall-clock deadlines are hard from the parent's perspective. Process-tree resident memory
+and generated-directory growth are sampled with psutil and filesystem measurements. A
+sampled limit violation kills the tree, but these are not identical to kernel quotas:
+
+- Windows has no Job Object quota in this implementation; a very fast allocation may
+  briefly exceed the configured budget between samples.
+- Linux and macOS use the same sampling policy rather than `RLIMIT_AS`, because NumPy and
+  BLAS may reserve virtual address space far beyond resident memory.
+- Descendants that deliberately escape their process group and re-parent between samples
+  cannot be guaranteed catchable on every OS. The reviewed worker does not daemonize or
+  launch solver children.
+
+Generated tables live in a versioned operating-system user cache, never the repository.
+Initialization uses an exclusive lock, a same-filesystem staging directory, exact file
+and size checks, NumPy magic checks, SHA-256 integrity metadata, and atomic directory
+publication. Incomplete or corrupted caches are rebuilt under the lock. Cold
+initialization and warm solving have separate deadlines.

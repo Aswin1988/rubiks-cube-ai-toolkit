@@ -8,7 +8,7 @@ import pytest
 from rubiks_cube_ai_toolkit import cli
 from rubiks_cube_ai_toolkit.cli import main
 from rubiks_cube_ai_toolkit.model import FaceletState, Move, generate_scramble, invert_moves
-from rubiks_cube_ai_toolkit.solvers import SolveResult, SolveStatus
+from rubiks_cube_ai_toolkit.solvers import SolveResult, SolveStatus, UnavailableSolver
 
 SOLVED = "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
 
@@ -75,8 +75,10 @@ def test_verify_accepts_inverse_and_rejects_wrong_solution(
 
 
 def test_solve_handles_solved_unavailable_invalid_and_bad_limits(
+    monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    monkeypatch.setattr(cli, "RubikSolverSubprocess", lambda config: UnavailableSolver())
     scrambled = FaceletState.solved().apply_move(Move.R).serialize()
     assert main(["solve", SOLVED, "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["status"] == "already_solved"
@@ -85,6 +87,10 @@ def test_solve_handles_solved_unavailable_invalid_and_bad_limits(
     assert main(["solve", "U"]) == 3
     assert "invalid_state" in capsys.readouterr().out
     assert main(["solve", SOLVED, "--timeout", "0"]) == 2
+    assert "positive" in capsys.readouterr().out
+    assert main(["solve", SOLVED, "--init-timeout", "0", "--json"]) == 2
+    assert "positive" in json.loads(capsys.readouterr().out)["error"]
+    assert main(["solve", SOLVED, "--memory-limit-mb", "0"]) == 2
     assert "positive" in capsys.readouterr().out
 
 

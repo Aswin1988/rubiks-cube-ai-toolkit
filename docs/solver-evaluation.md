@@ -5,9 +5,39 @@ review separates license compatibility from operational suitability: an MIT labe
 alone is not enough when initialization, timeout enforcement, determinism, or supported
 platforms remain unresolved.
 
-## Decision
+## Phase 2C decision (2026-11-21)
 
-No third-party solver is integrated in Phase 2. The public `Solver` protocol and
+`rubik-solver-py==0.1.1` is selected only behind a separately managed subprocess. The
+optional `solver` extra pins the evaluated NumPy and psutil versions as well. It is not
+safe to call the package in-process because its API has no cooperative wall-clock
+deadline.
+
+The isolated Windows evaluation observed:
+
+- cold initialization: 28.150 seconds internally, 8,738,477 bytes of tables;
+- peak cold working set: 90,095,616 bytes; peak private allocation: 439,865,344 bytes;
+- cached initialization: 0.024 seconds internally;
+- fixed 20-state corpus: 20/20 returned and 20/20 independently verified;
+- warm solve P50/P95: 0.364/1.873 seconds;
+- one identical solution across 11 fresh and reused-process repetitions;
+- successful Python 3.13 installation, cached initialization, solve, and verification.
+
+The production adapter adds hard parent-side deadlines, process-tree termination, bounded
+JSON IPC and diagnostics, memory/disk monitoring, a 64 MiB cache ceiling, atomic table
+publication, concurrent-initializer locking, and SHA-256 corruption detection.
+
+The same evaluation stopped `tcbegley/cube-solver` at the five-minute cold-initialization
+deadline. It had reached only 17% of one pruning table, with about 15 minutes reported as
+remaining for that table. Peak working set was 913,256,448 bytes. Later solve and
+determinism stages were not run.
+
+Raw Phase 2B evidence was kept outside the repository under the approved experiment
+directory. The Phase 2C production benchmark and its corpus hash are reported in
+[phase2-benchmark.md](phase2-benchmark.md).
+
+## Phase 2 draft decision (2026-11-19)
+
+No third-party solver was integrated in the initial Phase 2 draft. The public `Solver` protocol and
 mandatory independent-verification gate are implemented, while the CLI returns the
 structured `unavailable` outcome for non-solved inputs. This follows the project rule
 that unresolved solver behavior must not be presented as a reliable capability.
