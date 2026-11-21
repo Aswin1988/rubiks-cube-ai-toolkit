@@ -20,11 +20,13 @@ The current implementation provides:
 - an independent sticker-cycle verification engine with HTM/QTM metrics;
 - a verification-gated `Solver` protocol and structured failure outcomes;
 - functional `scramble`, `validate`, `apply`, `solve`, and `verify` CLI commands;
+- local stdio MCP tools for those same five verified operations;
 - an optional `rubik-solver-py` backend isolated behind a supervised JSON subprocess.
 
 The solver extra is deliberately optional. Without it, `solve` reports an actionable
 `unavailable` result; modeling, validation, move application, and verification remain
-dependency-free. MCP tools, agent skills, and computer vision remain out of scope.
+dependency-free. MCP and solver dependencies are separate optional extras. Agent skills
+and computer vision remain out of scope.
 
 ## Requirements
 
@@ -44,6 +46,12 @@ Install the reviewed deterministic solver stack when solving is required:
 
 ```console
 uv sync --dev --extra solver
+```
+
+Install the local MCP server, with the solver backend when `cube_solve` is required:
+
+```console
+uv sync --dev --extra mcp --extra solver
 ```
 
 If the machine-wide `uv` cache is unavailable, use an ignored local cache:
@@ -104,6 +112,42 @@ wheel with its `[solver]` extra) and retry.
 Exit codes are 0 for success, 2 for usage or notation errors, 3 for invalid states or
 failed verification, 4 for timeout, and 5 for solver failure or unavailability.
 
+## MCP server
+
+`cube-ai-mcp` runs a local stdio server using the official Python MCP SDK. It exposes
+exactly five tools: `cube_scramble`, `cube_validate`, `cube_apply`, `cube_solve`, and
+`cube_verify`. Every tool returns a JSON object with `ok`, `tool`, `data`, and `error`
+fields. Invalid physical states and invalid notation are structured tool results rather
+than silently accepted inputs. Successful solve results have passed the independent
+sticker-cycle verifier.
+
+Example configuration for clients that accept a JSON stdio server definition:
+
+```json
+{
+  "mcpServers": {
+    "rubiks-cube": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/rubiks-cube-ai-toolkit",
+        "run",
+        "--extra",
+        "mcp",
+        "--extra",
+        "solver",
+        "cube-ai-mcp"
+      ]
+    }
+  }
+}
+```
+
+Use an absolute repository path, restart the client after changing its configuration, and
+omit `--extra solver` if solving is not needed. In an installed environment, configure
+the client with `"command": "cube-ai-mcp"` and no arguments. The server writes protocol
+messages only to stdio; do not wrap it with a command that prints to stdout.
+
 ## Reliability policy
 
 Solver output is never treated as correct merely because the solver returned it. The
@@ -132,11 +176,11 @@ reproduction command.
 
 ## License
 
-Original project code is licensed under the [MIT License](LICENSE). Third-party solver,
-MCP, and computer-vision dependencies will receive a documented license review before
-integration; their licenses remain their own.
+Original project code is licensed under the [MIT License](LICENSE). Third-party solver and
+MCP dependencies have documented license notices; their licenses remain their own.
+Computer-vision dependencies will receive review before integration.
 
-Optional solver attribution is recorded in
+Optional dependency attribution is recorded in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Contributing

@@ -1,7 +1,16 @@
 # Third-Party Notices
 
-The optional `solver` extra installs software maintained and licensed separately from
-this project. These notices apply when that extra is installed or redistributed.
+The optional `solver` and `mcp` extras install software maintained and licensed separately
+from this project. These notices apply when those extras are installed or redistributed.
+
+## MCP Python SDK 2.x
+
+Source: <https://github.com/modelcontextprotocol/python-sdk>
+
+License: MIT
+
+The complete license file is distributed with the installed `mcp` package and remains
+authoritative. Its transitive dependencies retain their own licenses and notices.
 
 ## rubik-solver-py 0.1.1
 

@@ -1,6 +1,6 @@
 [project]
 name = "rubiks-cube-ai-toolkit"
-version = "0.2.0"
+version = "0.3.0"
 description = "Deterministic Rubik's Cube primitives for reliable AI agent tools"
 readme = "README.md"
 authors = [
@@ -21,6 +21,9 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+mcp = [
+    "mcp>=2.0.0,<3",
+]
 solver = [
     "numpy==2.5.5",
     "psutil==7.2.2",
@@ -34,6 +37,7 @@ Issues = "https://github.com/Aswin1988/rubiks-cube-ai-toolkit/issues"
 
 [project.scripts]
 cube-ai = "rubiks_cube_ai_toolkit.cli:main"
+cube-ai-mcp = "rubiks_cube_ai_toolkit.mcp_server:main"
 
 [build-system]
 requires = ["uv_build>=0.10.2,<0.11.0"]
@@ -41,6 +45,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "mcp>=2.0.0,<3",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
     "ruff>=0.17.5",
