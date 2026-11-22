@@ -21,6 +21,10 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+api = [
+    "fastapi>=0.121.0,<1",
+    "uvicorn[standard]>=0.38.0,<1",
+]
 mcp = [
     "mcp>=2.0.0,<3",
 ]
@@ -45,6 +49,8 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "fastapi>=0.121.0,<1",
+    "httpx>=0.28.1,<1",
     "mcp>=2.0.0,<3",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
@@ -52,6 +58,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 addopts = [
     "--strict-config",
     "--strict-markers",

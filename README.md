@@ -32,6 +32,7 @@ and computer vision remain out of scope.
 
 - Python 3.12 or newer
 - [`uv`](https://docs.astral.sh/uv/) for the reproducible development environment
+- Node.js 20.9 or newer and npm for the interactive web demo
 
 ## Development
 
@@ -60,6 +61,31 @@ If the machine-wide `uv` cache is unavailable, use an ignored local cache:
 $env:UV_CACHE_DIR = ".uv-cache"
 uv sync --dev
 ```
+
+## Interactive web demo
+
+The local demo uses a FastAPI adapter on port 8000 and a Next.js frontend on port
+3000. Install the API and reviewed solver dependencies, then start the backend from
+the repository root:
+
+```console
+uv sync --dev --extra api --extra solver
+uv run uvicorn apps.api.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+In a second terminal, install the locked frontend dependencies and start Next.js:
+
+```console
+cd apps/web
+npm ci
+npm run dev
+```
+
+Open <http://localhost:3000>. The frontend uses <http://localhost:8000> by default.
+To use a different API origin, set `NEXT_PUBLIC_API_URL` in an ignored
+`apps/web/.env.local` file before starting Next.js. If the frontend origin changes,
+also include it in the backend's comma-separated `CUBE_CORS_ORIGINS` environment
+variable.
 
 ## State and notation conventions
 

@@ -9,6 +9,12 @@ __pycache__/
 htmlcov/
 build/
 dist/
+.next/
+node_modules/
+*.tsbuildinfo
+apps/web/coverage/
+apps/web/test-results/
+apps/web/playwright-report/
 .env
 .env.*
 !.env.example
